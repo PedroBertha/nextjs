@@ -19,16 +19,19 @@ export default function EditInvoiceForm({
   invoice: InvoiceForm;
   customers: CustomerField[];
 }) {
-  const initialState: State = { menssage: null, errors: {} };
+  const initialState: State = { message: null, errors: {} };
+
+  // Faz bind do ID da invoice na função updateInvoice
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
-  const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
- 
-  return <form action={formAction}>{/* ... */}</form>;
-}
-  return <form action={updateInvoiceWithId}></form>
+
+  // Usa o hook corretamente, com o estado inicial
+  const [state, formAction] = useActionState<State>(
+    updateInvoiceWithId,
+    initialState
+  );
 
   return (
-    <form>
+    <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -41,6 +44,10 @@ export default function EditInvoiceForm({
               name="customerId"
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue={invoice.customer_id}
+              aria-invalid={!!state.errors?.customerId}
+              aria-errormessage={
+                state.errors?.customerId ? 'customer-error' : undefined
+              }
             >
               <option value="" disabled>
                 Select a customer
@@ -53,6 +60,17 @@ export default function EditInvoiceForm({
             </select>
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           </div>
+          {state.errors?.customerId && (
+            <div
+              id="customer-error"
+              role="alert"
+              className="mt-2 text-sm text-red-500"
+            >
+              {state.errors.customerId.map((err) => (
+                <p key={err}>{err}</p>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Invoice Amount */}
@@ -61,19 +79,32 @@ export default function EditInvoiceForm({
             Choose an amount
           </label>
           <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                defaultValue={invoice.amount}
-                placeholder="Enter USD amount"
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              />
-              <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
+            <input
+              id="amount"
+              name="amount"
+              type="number"
+              step="0.01"
+              defaultValue={invoice.amount}
+              placeholder="Enter USD amount"
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+              aria-invalid={!!state.errors?.amount}
+              aria-errormessage={
+                state.errors?.amount ? 'amount-error' : undefined
+              }
+            />
+            <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
           </div>
+          {state.errors?.amount && (
+            <div
+              id="amount-error"
+              role="alert"
+              className="mt-2 text-sm text-red-500"
+            >
+              {state.errors.amount.map((err) => (
+                <p key={err}>{err}</p>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Invoice Status */}
@@ -92,10 +123,7 @@ export default function EditInvoiceForm({
                   defaultChecked={invoice.status === 'pending'}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
-                <label
-                  htmlFor="pending"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-                >
+                <label htmlFor="pending" className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600">
                   Pending <ClockIcon className="h-4 w-4" />
                 </label>
               </div>
@@ -108,10 +136,7 @@ export default function EditInvoiceForm({
                   defaultChecked={invoice.status === 'paid'}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
-                <label
-                  htmlFor="paid"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
-                >
+                <label htmlFor="paid" className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white">
                   Paid <CheckIcon className="h-4 w-4" />
                 </label>
               </div>
@@ -119,6 +144,7 @@ export default function EditInvoiceForm({
           </div>
         </fieldset>
       </div>
+
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/invoices"
