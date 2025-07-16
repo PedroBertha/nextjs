@@ -28,21 +28,21 @@ export async function updateInvoice(id: string, formData: FormData) {
 
   try {
     await sql`
-    UPDATE invoices
-    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-    WHERE id = ${id}
-  `;
+        UPDATE invoices
+        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        WHERE id = ${id}
+      `
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-
+ 
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
 
 const CreateInvoices = FormSchema.omit({ id: true, date: true })
 
-export async function createInvoices(formData: FormData) {
+export async function createInvoice(formData: FormData) {
   const { customerId, amount, status } = CreateInvoices.parse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
@@ -54,11 +54,11 @@ export async function createInvoices(formData: FormData) {
 
   try {
     await sql`
-    INSERT INTO invoices (customer_id, amount, status, date)
-    VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-  `
+      INSERT INTO invoices (customer_id, amount, status, date)
+      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+    `
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 
   revalidatePath('/dashboard/invoices');
@@ -66,6 +66,8 @@ export async function createInvoices(formData: FormData) {
 }
 
 export async function deleteInvoice(id: string) {
+  throw new Error('Falied to Delete Invoice ')
+
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath('/dashboard/invoices');
 }
